@@ -5,6 +5,7 @@ Application de calcul du plus court chemin entre les villes marocaines avec simu
 ## Structure du Projet
 
 ### Fichiers Principaux
+
 - **app.py** - Application Streamlit (interface web)
 - **graph_algorithms.py** - Implémentation des algorithmes (Dijkstra et Bellman-Ford)
 - **djikstra.py** - Version standalone de l'algorithme de Dijkstra
@@ -12,6 +13,7 @@ Application de calcul du plus court chemin entre les villes marocaines avec simu
 - **MatriceAdj.py** - Représentation du graphe en matrice d'adjacence
 
 ### Réseau de Villes
+
 - **C** : Casablanca (Siège et Datacenter principal)
 - **R** : Rabat (Direction régionale et Datacenter de secours)
 - **T** : Tanger
@@ -52,6 +54,7 @@ L'application sera accessible sur http://localhost:8501
 ## Tests de Validation
 
 Les algorithmes ont été testés et validés:
+
 - Dijkstra et Bellman-Ford donnent des résultats identiques
 - Tous les chemins sont bidirectionnels (A→B = B→A)
 - Toutes les villes sont accessibles depuis n'importe quel point

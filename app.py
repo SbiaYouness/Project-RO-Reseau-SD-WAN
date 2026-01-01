@@ -11,7 +11,6 @@ from graph_algorithms import Graph
 # Page configuration
 st.set_page_config(
     page_title="Plus Court Chemin - RO",
-    page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -156,7 +155,7 @@ def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     return fig
 
 def main():
-    st.markdown('<div class="main-header">🗺️ Plus Court Chemin</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Plus Court Chemin</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Recherche Opérationnelle - Simulation de Pannes</div>', 
                 unsafe_allow_html=True)
     
@@ -166,7 +165,7 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.markdown("### ⚙️ Configuration")
+        st.markdown("### Configuration")
         
         display_options = [f"{city_names[code]} ({code})" for code in nodes]
         node_to_display = {code: f"{city_names[code]} ({code})" for code in nodes}
@@ -201,10 +200,10 @@ def main():
             )
             disabled_links = [(src, dest) for src, dest, _ in disabled_links_display]
         
-        run_button = st.button("🚀 Calculer", type="primary", use_container_width=True)
+        run_button = st.button("Calculer", type="primary", use_container_width=True)
         
         st.markdown("---")
-        st.markdown("**🎨 Légende**")
+        st.markdown("**Légende**")
         st.markdown("🟢 Départ | 🔴 Arrivée\n🟡 Intermédiaires | 🔵 Autres\n⚪ Hors service")
     
     # Main content - Always show graph
@@ -241,7 +240,7 @@ def main():
             else:
                 col1, col2 = st.columns([3, 1])
                 with col2:
-                    st.success(f"✅ Chemin optimal")
+                    st.success(f"Chemin optimal")
                     st.metric("Latence", f"{distances[destination]}")
                     st.metric("Étapes", len(path) - 1)
                     
@@ -256,16 +255,26 @@ def main():
             
             # Show graph in left column
             with graph_col:
-                fig = create_network_graph(graph, path, disabled_links, disabled_cities)
+                graph_placeholder = st.empty()
+                with graph_placeholder.container():
+                    st.markdown("<br>" * 8, unsafe_allow_html=True)
+                    with st.spinner('Calcul du chemin et génération du graphe...'):
+                        fig = create_network_graph(graph, path, disabled_links, disabled_cities)
+                    graph_placeholder.empty()
                 st.pyplot(fig)
                 plt.close()
     
     else:
         col1, col2 = st.columns([3, 1])
         with col2:
-            st.info("👈 Configurez et cliquez sur **Calculer**")
+            st.info("Configurez et cliquez sur **Calculer**")
         with col1:
-            fig = create_network_graph(graph, None, set(), set())
+            graph_placeholder = st.empty()
+            with graph_placeholder.container():
+                st.markdown("<br>" * 8, unsafe_allow_html=True)
+                with st.spinner('Chargement du graphe...'):
+                    fig = create_network_graph(graph, None, set(), set())
+                graph_placeholder.empty()
             st.pyplot(fig)
             plt.close()
 
