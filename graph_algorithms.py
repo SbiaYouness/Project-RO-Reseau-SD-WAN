@@ -7,17 +7,18 @@ class Graph:
     """Graph representation with nodes and weighted edges."""
     
     def __init__(self):
+        # Bidirectional graph - all edges work in both directions
         self.graph = {
-            'A': [('M', 20), ('S', 28), ('C', 36)],
+            'A': [('M', 20), ('S', 28), ('C', 36), ('B', 25)],
             'B': [('M', 16), ('S', 24), ('F', 28), ('A', 25)],
-            'C': [('M', 30), ('R', 11), ('T', 27)],
-            'R': [('M', 22), ('F', 14)],
-            'T': [('F', 22), ('H', 35)],
-            'F': [('H', 30), ('O', 42)],
-            'H': [('O', 11)],
-            'M': [],
-            'S': [],
-            'O': []
+            'C': [('M', 30), ('R', 11), ('T', 27), ('A', 36)],
+            'R': [('M', 22), ('F', 14), ('C', 11)],
+            'T': [('F', 22), ('H', 35), ('C', 27)],
+            'F': [('H', 30), ('O', 42), ('B', 28), ('R', 14), ('T', 22)],
+            'H': [('O', 11), ('F', 30), ('T', 35)],
+            'M': [('A', 20), ('B', 16), ('C', 30), ('R', 22)],
+            'S': [('A', 28), ('B', 24)],
+            'O': [('F', 42), ('H', 11)]
         }
         self.nodes = list(self.graph.keys())
         self.node_index = {node: i for i, node in enumerate(self.nodes)}
@@ -25,9 +26,9 @@ class Graph:
         # Full city names
         self.city_names = {
             'A': 'Agadir',
-            'B': 'Benguerir',
+            'B': 'Béni Mellal',
             'C': 'Casablanca',
-            'F': 'Fes',
+            'F': 'Fès',
             'H': 'Hoceima',
             'M': 'Marrakech',
             'O': 'Oujda',

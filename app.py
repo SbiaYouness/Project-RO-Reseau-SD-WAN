@@ -45,15 +45,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-@st.cache_resource
 def load_graph():
+    """Load the graph (cache removed to ensure latest version is used)"""
     return Graph()
 
 def get_fixed_positions():
     """Positions optimisées des villes"""
     return {
-        'C': (-5, 0), 'R': (-3, 2.5), 'M': (-3, -5), 'T': (-4, 4.5),
-        'A': (1, -5), 'F': (2, 0), 'H': (3, 2.5), 'B': (3.5, -5.5),
+        'C': (-5, 0), 'R': (-3, 2.5), 'M': (-3, -5.5), 'T': (-4, 4.5),
+        'A': (1, -5), 'F': (2, 0), 'H': (3, 2.5), 'B': (3.5, -6.2),
         'S': (2, -3.5), 'O': (5, 0)
     }
 
@@ -81,12 +81,19 @@ def get_edge_styles():
 
 def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     """Create graph with failures simulation."""
-    G = nx.DiGraph()
+    G = nx.Graph()  # Use undirected graph for visualization
+    seen_edges = set()
+    
     for source, dest, weight in graph_obj.get_edges():
         # Skip disabled links and cities
-        if (source, dest) in disabled_links or source in disabled_cities or dest in disabled_cities:
+        if (source, dest) in disabled_links or (dest, source) in disabled_links or source in disabled_cities or dest in disabled_cities:
             continue
-        G.add_edge(source, dest, weight=weight)
+        
+        # Only add one edge per pair (avoid duplicates)
+        edge_pair = tuple(sorted([source, dest]))
+        if edge_pair not in seen_edges:
+            seen_edges.add(edge_pair)
+            G.add_edge(source, dest, weight=weight)
     
     fig, ax = plt.subplots(figsize=(18, 10))
     pos = get_fixed_positions()
@@ -122,17 +129,16 @@ def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     # Path edges
     path_edges = [(path[i], path[i+1]) for i in range(len(path)-1)] if path else []
     
-    # Draw edges
+    # Draw edges (no arrows since undirected)
     for edge in G.edges():
-        is_path = edge in path_edges
+        is_path = edge in path_edges or (edge[1], edge[0]) in path_edges
         color = '#4CAF50' if is_path else '#999999'
         width = 6 if is_path else 2.5
         alpha = 0.85 if is_path else 0.55
         
-        connection_style = edge_styles.get(edge, 'arc3,rad=0.1')
+        connection_style = edge_styles.get(edge, edge_styles.get((edge[1], edge[0]), 'arc3,rad=0.1'))
         nx.draw_networkx_edges(G, pos, edgelist=[edge], edge_color=color, 
-                              width=width, alpha=alpha, arrows=True, arrowsize=28, 
-                              arrowstyle='->', ax=ax, connectionstyle=connection_style)
+                              width=width, alpha=alpha, ax=ax, connectionstyle=connection_style)
     
     # Labels for all nodes
     nx.draw_networkx_labels(G, pos, font_size=17, font_weight='bold', font_color='white', ax=ax)
@@ -197,8 +203,9 @@ def main():
         
         run_button = st.button("🚀 Calculer", type="primary", use_container_width=True)
         
-        with st.expander("🎨 Légende"):
-            st.markdown("🟢 Départ | 🔴 Arrivée\n🟡 Intermédiaires | 🔵 Autres\n⚪ Hors service")
+        st.markdown("---")
+        st.markdown("**🎨 Légende**")
+        st.markdown("🟢 Départ | 🔴 Arrivée\n🟡 Intermédiaires | 🔵 Autres\n⚪ Hors service")
     
     # Main content - Always show graph
     if run_button:
@@ -206,16 +213,23 @@ def main():
             st.warning("⚠️ La ville de départ et d'arrivée sont identiques !")
             graph_col = st.container()
         else:
-            # Create modified graph excluding failures
-            modified_graph = Graph()
-            modified_graph.graph = {node: [] for node in nodes}
-            
-            for src, dest, weight in graph.get_edges():
-                if src not in disabled_cities and dest not in disabled_cities and (src, dest) not in disabled_links:
-                    modified_graph.graph[src].append((dest, weight))
-            
-            distances, predecessors = modified_graph.dijkstra(source)
-            path = modified_graph.reconstruct_path(predecessors, source, destination)
+            # Use original graph if no failures, otherwise create modified graph
+            if disabled_cities or disabled_links:
+                # Create modified graph excluding failures
+                modified_graph = Graph()
+                modified_graph.graph = {node: [] for node in nodes}
+                
+                for src, dest, weight in graph.get_edges():
+                    # Check both directions since graph is bidirectional
+                    if src not in disabled_cities and dest not in disabled_cities and (src, dest) not in disabled_links and (dest, src) not in disabled_links:
+                        modified_graph.graph[src].append((dest, weight))
+                
+                distances, predecessors = modified_graph.dijkstra(source)
+                path = modified_graph.reconstruct_path(predecessors, source, destination)
+            else:
+                # No failures - use original graph
+                distances, predecessors = graph.dijkstra(source)
+                path = graph.reconstruct_path(predecessors, source, destination)
             
             if not path:
                 col1, col2 = st.columns([3, 1])

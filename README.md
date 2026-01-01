@@ -1,84 +1,58 @@
-# Shortest Path Finder - Operations Research Project
+# Projet Recherche Opérationnelle - Plus Court Chemin
 
-A professional Streamlit web application for finding optimal paths between cities using Dijkstra and Bellman-Ford algorithms.
+Application de calcul du plus court chemin entre les villes marocaines avec simulation de pannes.
 
-## 🚀 Features
+## Structure du Projet
 
-- **Interactive UI**: Select start and destination cities via dropdown menus
-- **Multiple Algorithms**: Choose between Dijkstra, Bellman-Ford, or compare both
-- **Visual Graph**: NetworkX-powered graph visualization with highlighted paths
-- **Detailed Results**: View total latency, number of hops, execution time, and step-by-step routes
-- **Performance Comparison**: Side-by-side algorithm comparison with metrics
+### Fichiers Principaux
+- **app.py** - Application Streamlit (interface web)
+- **graph_algorithms.py** - Implémentation des algorithmes (Dijkstra et Bellman-Ford)
+- **djikstra.py** - Version standalone de l'algorithme de Dijkstra
+- **bellman_ford.py** - Version standalone de l'algorithme de Bellman-Ford
+- **MatriceAdj.py** - Représentation du graphe en matrice d'adjacence
 
-## 📋 Prerequisites
+### Réseau de Villes
+- **C** : Casablanca (Siège et Datacenter principal)
+- **R** : Rabat (Direction régionale et Datacenter de secours)
+- **T** : Tanger
+- **F** : Fès
+- **M** : Marrakech
+- **A** : Agadir
+- **O** : Oujda
+- **B** : Béni Mellal
+- **S** : Safi
+- **H** : Hoceima
 
-- Python 3.11+
-- Virtual environment (included)
-
-## 🔧 Installation & Setup
-
-1. **Activate the virtual environment** (already created):
+## Installation
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-```
+# Activer l'environnement virtuel
+.venv\Scripts\activate
 
-2. **Install dependencies** (if not already installed):
-
-```powershell
+# Installer les dépendances (si nécessaire)
 pip install -r requirements.txt
 ```
 
-## ▶️ Running the Application
+## Lancement
 
 ```powershell
 streamlit run app.py
 ```
 
-The application will open automatically in your default browser at `http://localhost:8501`
+L'application sera accessible sur http://localhost:8501
 
-## 📁 Project Structure
+## Fonctionnalités
 
-```
-Projet R.O/
-├── app.py                  # Main Streamlit application
-├── graph_algorithms.py     # Graph class with Dijkstra & Bellman-Ford
-├── requirements.txt        # Python dependencies
-├── djikstra.py            # Original Dijkstra implementation
-├── bellman_ford.py        # Original Bellman-Ford implementation
-├── MatriceAdj.py          # Matrix adjacency operations
-└── README.md              # This file
-```
+✅ **Calcul du Plus Court Chemin** - Algorithme de Dijkstra
+✅ **Visualisation Graphique** - Réseau interactif avec positions fixes
+✅ **Simulation de Pannes** - Désactivation de villes et liaisons
+✅ **Interface Bilingue** - Labels en français
+✅ **Graphe Bidirectionnel** - Toutes les liaisons fonctionnent dans les deux sens
 
-## 🎯 How to Use
+## Tests de Validation
 
-1. **Select Cities**: Use the sidebar to choose your start and destination cities
-2. **Choose Algorithm**: Pick Dijkstra, Bellman-Ford, or compare both
-3. **Find Path**: Click "Find Shortest Path" button
-4. **View Results**: See the optimal route, latency, and visualization
-
-## 🧮 Algorithms
-
-### Dijkstra's Algorithm
-
-- Best for graphs with non-negative weights
-- Greedy approach with priority queue
-- Time complexity: O((V+E)log V)
-
-### Bellman-Ford Algorithm
-
-- Can handle negative weights
-- Dynamic programming approach
-- Time complexity: O(V×E)
-
-## 🗺️ Graph Structure
-
-The network consists of 10 cities (A, B, C, M, R, T, F, H, S, O) connected by weighted edges representing latency values.
-
-## 👨‍💻 Author
-
-Operations Research Project - 2026
-
-## 📄 License
-
-Academic project for educational purposes.
+Les algorithmes ont été testés et validés:
+- Dijkstra et Bellman-Ford donnent des résultats identiques
+- Tous les chemins sont bidirectionnels (A→B = B→A)
+- Toutes les villes sont accessibles depuis n'importe quel point
+- Les distances calculées sont les plus courtes possibles
