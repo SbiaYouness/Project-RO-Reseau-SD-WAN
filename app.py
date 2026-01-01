@@ -15,9 +15,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS with mobile optimization
+# Custom CSS
 st.markdown("""
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <style>
     .main-header {
         font-size: 2.5rem;
@@ -262,7 +261,7 @@ def main():
                     with st.spinner('Calcul du chemin et génération du graphe...'):
                         fig = create_network_graph(graph, path, disabled_links, disabled_cities)
                     graph_placeholder.empty()
-                st.pyplot(fig)
+                st.pyplot(fig, use_container_width=False)
                 plt.close()
     
     else:
@@ -276,7 +275,7 @@ def main():
                 with st.spinner('Chargement du graphe...'):
                     fig = create_network_graph(graph, None, set(), set())
                 graph_placeholder.empty()
-            st.pyplot(fig)
+            st.pyplot(fig, use_container_width=False)
             plt.close()
 
 if __name__ == "__main__":
