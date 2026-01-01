@@ -15,8 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS with mobile optimization
 st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <style>
     .main-header {
         font-size: 2.5rem;
@@ -241,7 +242,7 @@ def main():
                 col1, col2 = st.columns([3, 1])
                 with col2:
                     st.success(f"Chemin optimal")
-                    st.metric("Latence", f"{distances[destination]}")
+                    st.metric("Latence", f"{distances[destination]} ms")
                     st.metric("Étapes", len(path) - 1)
                     
                     path_full_names = [city_names[node] for node in path]
@@ -250,7 +251,7 @@ def main():
                     st.info(path_str)
                     
                     if disabled_cities or disabled_links:
-                        st.caption(f"🔧 {len(disabled_cities)} ville(s), {len(disabled_links)} liaison(s) désactivée(s)")
+                        st.caption(f"{len(disabled_cities)} ville(s), {len(disabled_links)} liaison(s) désactivée(s)")
                 graph_col = col1
             
             # Show graph in left column
