@@ -29,3 +29,5 @@ Thumbs.db
 # Test/backup files
 *.bak
 *.tmp
+
+djikstra.py

@@ -15,8 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS with mobile support
 st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes">
     <style>
     .main-header {
         font-size: 2.5rem;
@@ -40,6 +41,35 @@ st.markdown("""
         border-radius: 0.5rem;
         text-align: center;
         margin: 1rem 0;
+    }
+    .legend-box {
+        background-color: #fafafa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-top: 12px;
+    }
+    .legend-item {
+        font-size: 0.875rem;
+        line-height: 1.8;
+        color: #333333;
+        display: block;
+        margin: 2px 0;
+        padding: 0;
+    }
+    div.stButton > button {
+        background-color: #1f77b4;
+        color: white;
+        border: none;
+    }
+    div.stButton > button:hover {
+        background-color: #1565c0;
+        border: none;
+    }
+    .red-x {
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 1rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -79,26 +109,24 @@ def get_edge_styles():
     }
 
 def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
-    """Create graph with failures simulation."""
-    G = nx.Graph()  # Use undirected graph for visualization
+    """Create graph with failures simulation - keeping disabled elements visible but grayed out."""
+    G = nx.Graph()
     seen_edges = set()
     
+    # Add ALL edges (including disabled ones)
     for source, dest, weight in graph_obj.get_edges():
-        # Skip disabled links and cities
-        if (source, dest) in disabled_links or (dest, source) in disabled_links or source in disabled_cities or dest in disabled_cities:
-            continue
-        
-        # Only add one edge per pair (avoid duplicates)
         edge_pair = tuple(sorted([source, dest]))
         if edge_pair not in seen_edges:
             seen_edges.add(edge_pair)
-            G.add_edge(source, dest, weight=weight)
+            # Mark if edge is disabled
+            is_disabled = (source, dest) in disabled_links or (dest, source) in disabled_links or source in disabled_cities or dest in disabled_cities
+            G.add_edge(source, dest, weight=weight, disabled=is_disabled)
     
     fig, ax = plt.subplots(figsize=(18, 10))
     pos = get_fixed_positions()
     edge_styles = get_edge_styles()
     
-    # Include all nodes even if not in current graph
+    # All nodes
     all_nodes = list(pos.keys())
     
     # Node colors
@@ -106,7 +134,7 @@ def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     node_sizes = []
     for node in all_nodes:
         if node in disabled_cities:
-            node_colors.append('#CCCCCC')
+            node_colors.append('#CCCCCC')  # Gray for disabled
             node_sizes.append(2200)
         elif path and node in path:
             if node == path[0]:
@@ -128,8 +156,25 @@ def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     # Path edges
     path_edges = [(path[i], path[i+1]) for i in range(len(path)-1)] if path else []
     
-    # Draw edges (no arrows since undirected)
-    for edge in G.edges():
+    # Draw edges - separate active and disabled
+    active_edges = []
+    disabled_edges = []
+    
+    for edge in G.edges(data=True):
+        if edge[2].get('disabled', False):
+            disabled_edges.append((edge[0], edge[1]))
+        else:
+            active_edges.append((edge[0], edge[1]))
+    
+    # Draw disabled edges first (grayed out with dashed lines)
+    for edge in disabled_edges:
+        connection_style = edge_styles.get(edge, edge_styles.get((edge[1], edge[0]), 'arc3,rad=0.1'))
+        nx.draw_networkx_edges(G, pos, edgelist=[edge], edge_color='#D3D3D3', 
+                              width=2, alpha=0.4, ax=ax, connectionstyle=connection_style,
+                              style='dashed')
+    
+    # Draw active edges
+    for edge in active_edges:
         is_path = edge in path_edges or (edge[1], edge[0]) in path_edges
         color = '#4CAF50' if is_path else '#999999'
         width = 6 if is_path else 2.5
@@ -142,16 +187,62 @@ def create_network_graph(graph_obj, path, disabled_links, disabled_cities):
     # Labels for all nodes
     nx.draw_networkx_labels(G, pos, font_size=17, font_weight='bold', font_color='white', ax=ax)
     
-    # Edge labels
-    edge_labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=12, font_color='#d32f2f',
+    # Edge labels - show red X for disabled, weight for active
+    edge_labels = {}
+    for edge in G.edges(data=True):
+        edge_key = (edge[0], edge[1])
+        if edge[2].get('disabled', False):
+            edge_labels[edge_key] = 'X'  # X for disabled links
+        else:
+            edge_labels[edge_key] = edge[2]['weight']
+    
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=14, font_color='#d32f2f',
                                  font_weight='bold', ax=ax,
                                  bbox=dict(boxstyle='round,pad=0.4', facecolor='white', alpha=0.85))
     
+    # Draw red X on disabled cities using text 'X'
+    for node in disabled_cities:
+        if node in pos:
+            x, y = pos[node]
+            ax.text(x, y, 'X', fontsize=32, ha='center', va='center', 
+                   color='red', weight='bold', zorder=1000)
+    
     ax.set_title("Réseau de Villes - Plus Court Chemin", fontsize=20, fontweight='bold', pad=25, color='#1f77b4')
+    
+    # VERSION 1: Legend at absolute bottom left - fixed coordinates, no background box
+    legend_x = -6.0
+    legend_y_start = -7.5
+    
+    # Legend items - one per row
+    legend_items = [
+        {'color': '#4CAF50', 'text': 'Départ'},
+        {'color': '#F44336', 'text': 'Arrivée'},
+        {'color': '#FFC107', 'text': 'Intermédiaires'},
+        {'color': '#2196F3', 'text': 'Autres'},
+        {'color': '#CCCCCC', 'text': 'Hors service'},
+        {'color': '#dc3545', 'text': 'En panne', 'is_x': True}
+    ]
+    
+    # Draw legend items directly without background box
+    for i, item in enumerate(legend_items):
+        y_pos = legend_y_start + (i * 0.42)
+        
+        if item.get('is_x', False):
+            ax.text(legend_x, y_pos, 'X', fontsize=16, ha='left', va='center',
+                   color=item['color'], weight='bold', zorder=1000,
+                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='none', alpha=0.8))
+            ax.text(legend_x + 0.3, y_pos, item['text'], fontsize=13,
+                   ha='left', va='center', color='#333333', zorder=1000)
+        else:
+            ax.plot(legend_x + 0.1, y_pos, 'o', color=item['color'], 
+                   markersize=11, markeredgewidth=0, zorder=1000)
+            ax.text(legend_x + 0.3, y_pos, item['text'], fontsize=11,
+                   ha='left', va='center', color='#333333', zorder=1000)
+    
     ax.axis('off')
-    ax.margins(0.18)
-    plt.tight_layout()
+    ax.set_xlim(-6.2, 6)
+    ax.set_ylim(-7.8, 5.5)
+    plt.tight_layout(pad=0)
     return fig
 
 def main():
@@ -201,10 +292,6 @@ def main():
             disabled_links = [(src, dest) for src, dest, _ in disabled_links_display]
         
         run_button = st.button("Calculer", type="primary", use_container_width=True)
-        
-        st.markdown("---")
-        st.markdown("**Légende**")
-        st.markdown("🟢 Départ | 🔴 Arrivée\n🟡 Intermédiaires | 🔵 Autres\n⚪ Hors service")
     
     # Main content - Always show graph
     if run_button:
