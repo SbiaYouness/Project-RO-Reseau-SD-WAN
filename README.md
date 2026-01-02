@@ -1,3 +1,10 @@
+**Démo vidéo de l’interface**
+*Vidéo de démonstration à venir*
+
+https://github.com/user-attachments/assets/9c7f7198-baed-4b94-ac30-2e674a6a6313
+
+---
+
 # Projet Recherche Opérationnelle - Plus Court Chemin
 
 Application de calcul du plus court chemin entre les villes marocaines avec simulation de pannes.
@@ -33,29 +40,3 @@ Application de calcul du plus court chemin entre les villes marocaines avec simu
 
 # Installer les dépendances (si nécessaire)
 pip install -r requirements.txt
-```
-
-## Lancement
-
-```powershell
-streamlit run app.py
-```
-
-L'application sera accessible sur http://localhost:8501
-
-## Fonctionnalités
-
-✅ **Calcul du Plus Court Chemin** - Algorithme de Dijkstra
-✅ **Visualisation Graphique** - Réseau interactif avec positions fixes
-✅ **Simulation de Pannes** - Désactivation de villes et liaisons
-✅ **Interface Bilingue** - Labels en français
-✅ **Graphe Bidirectionnel** - Toutes les liaisons fonctionnent dans les deux sens
-
-## Tests de Validation
-
-Les algorithmes ont été testés et validés:
-
-- Dijkstra et Bellman-Ford donnent des résultats identiques
-- Tous les chemins sont bidirectionnels (A→B = B→A)
-- Toutes les villes sont accessibles depuis n'importe quel point
-- Les distances calculées sont les plus courtes possibles
