@@ -1,4 +1,4 @@
-**Démo vidéo de l’interface**
+**Démo vidéo de l’interface** | **Application** : https://optpath.streamlit.app/
 
 https://github.com/user-attachments/assets/9c7f7198-baed-4b94-ac30-2e674a6a6313
 
