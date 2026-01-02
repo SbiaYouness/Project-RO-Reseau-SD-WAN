@@ -1,5 +1,4 @@
 **Démo vidéo de l’interface**
-*Vidéo de démonstration à venir*
 
 https://github.com/user-attachments/assets/9c7f7198-baed-4b94-ac30-2e674a6a6313
 
